@@ -84,7 +84,7 @@ facebook_q(_Q, _Sql, Args, Context) ->
     %%
     Payload = case httpc:request(FqlUrl) of
         {ok, {{_, 200, _}, _Headers, Body}} ->
-            mochijson2:decode(Body);
+            z_json:decode(Body);
         Other ->
             ?DEBUG({error, {http_error, FqlUrl, Other}}),
             []
@@ -92,13 +92,13 @@ facebook_q(_Q, _Sql, Args, Context) ->
 
     %%
     Rows = case Payload of
-	       {struct, [{<<"error_code">>, _ErrorCode} | _T]} ->
-		   ?DEBUG(Payload),
-		   [];
-	       _ ->
-		   ?DEBUG(Payload),
-		   z_convert:convert_json(Payload)
-    end,
+               #{<<"error_code">> := _ErrorCode} ->
+                   ?DEBUG(Payload),
+                   [];
+               _ ->
+                   ?DEBUG(Payload),
+                   z_convert:convert_json(Payload)
+           end,
 
     #search_result{result=Rows}.
 
@@ -116,15 +116,13 @@ do_graph_call(Method, Id, Connection, Args, Context)
 
     Request = make_httpc_request(Method, "https", "graph.facebook.com", Path, Query),
 
-    Payload = case httpc:request(Method, Request, [], []) of
+    case httpc:request(Method, Request, [], []) of
 		  {ok, {{_, 200, _}, _Headers, Body}} ->
-		      mochijson2:decode(Body);
+		      z_json:decode(Body);
 		  Other ->
 		      ?DEBUG({error, {http_error, element(1, Request), Other}}),
 		      []
-	      end,
-
-    z_convert:convert_json(Payload).
+	      end.
 
 %% Create a http request for the inets httpc api.
 %%

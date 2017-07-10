@@ -28,7 +28,7 @@
 -include_lib("zotonic_core/include/zotonic.hrl").
 
 process_get(_Context) ->
-    {struct, [{status, result(z_sites_manager:all_sites_running())}]}.
+    #{<<"status">> => result(z_sites_manager:all_sites_running())}.
 
 result(true) -> ok;
 result(false) -> fail.
