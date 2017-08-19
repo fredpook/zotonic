@@ -226,8 +226,9 @@ medium(Id, Context) ->
     end.
 
 content_group(Id, Context) ->
-    CGId = m_rsc:p_no_acl(Id, content_group_id, Context),
-    case m_rsc:p_no_acl(CGId, name, Context) of
+    Sudo = z_acl:sudo(Context),
+    CGId = m_rsc:p(Id, content_group_id, Sudo),
+    case m_rsc:p(CGId, name, Sudo) of
         undefined -> CGId;
         Name -> Name
     end.
